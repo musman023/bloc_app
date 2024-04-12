@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:bloc_app/bloc/switch_example/switch_bloc.dart';
 import 'package:bloc_app/bloc/switch_example/switch_event.dart';
 import 'package:bloc_app/bloc/switch_example/switch_state.dart';
@@ -36,6 +34,8 @@ class _SwitchExampleScreenState extends State<SwitchExampleScreen> {
               children: [
                 const Text("Notifications"),
                 BlocBuilder<SwitchBloc, SwitchStates>(
+                  buildWhen: (previous, current) =>
+                      previous.isSwitch != current.isSwitch,
                   builder: (context, state) {
                     return Switch(
                         value: state.isSwitch,
@@ -50,12 +50,28 @@ class _SwitchExampleScreenState extends State<SwitchExampleScreen> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 40.0),
-              child: Container(
-                height: 200,
-                color: Colors.red.withOpacity(.2),
+              child: BlocBuilder<SwitchBloc, SwitchStates>(
+                builder: (context, state) {
+                  return Container(
+                    height: 200,
+                    color: Colors.red.withOpacity(state.slider),
+                  );
+                },
               ),
             ),
-            Slider(value: .4, onChanged: (value) {})
+            BlocBuilder<SwitchBloc, SwitchStates>(
+              buildWhen: (previous, current) =>
+                  previous.slider != current.slider,
+              builder: (context, state) {
+                return Slider(
+                    value: state.slider,
+                    onChanged: (value) {
+                      context
+                          .read<SwitchBloc>()
+                          .add(SliderEvent(slider: value));
+                    });
+              },
+            )
           ],
         ),
       ),
